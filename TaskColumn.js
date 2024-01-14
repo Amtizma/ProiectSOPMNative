@@ -62,6 +62,7 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
                     handleDeleteColumn();
                     setScrollEnabled(true);
                 } else {
+                    setScrollEnabled(true);
                     Animated.spring(swipeX, {
                         toValue: 0,
                         friction: 10,

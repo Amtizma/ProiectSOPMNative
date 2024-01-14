@@ -5,7 +5,6 @@ import TopBar from './topbar';
 import { cats } from "./Category";
 import { tsks } from "./AddTask";
 import TaskPage from "./AddTask";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const App = () => {
     const [sortOrder, setSortOrder] = useState('default');
     const [handledCats, setHandledCats] = useState([]);

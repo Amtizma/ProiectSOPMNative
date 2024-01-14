@@ -5,10 +5,9 @@ import {
     TouchableOpacity,
     TextInput,
     ScrollView,
-    Picker,
     Modal,
 } from 'react-native';
-
+import RNPickerSelect from 'react-native-picker-select';
 import ThemePopup from './ThemePopup';
 
 const TopBar = ({
@@ -250,9 +249,61 @@ const TopBar = ({
                         </TouchableOpacity>
                     </View>
                 </View>
-                {showThemePopup && (
-                    <View style={styles.themePopup}>
-                        <ThemePopup onClose={toggleThemePopup} />
+                {showRulesPopup && (
+                    <View style={styles.popupContainer}>
+                        <View style={styles.popupContent}>
+                            <TouchableOpacity style={styles.closeButton} onPress={toggleRulesPopup}>
+                                <Text style={styles.closeButtonText}>X</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.setReminderText}>Set Reminder!{'\n\n'}</Text>
+                            <View style={styles.inputContainer}>
+                                <View style={styles.inputRow}>
+                                    <Text style={styles.reminderLabel}>In </Text>
+                                    <TextInput
+                                        style={styles.timeInput}
+                                        placeholder="Number of"
+                                        keyboardType="numeric"
+                                        onChangeText={(input) => {
+                                            if (/^\d*\.?\d*$/.test(input)) {
+                                                handleRuleChange('time', input);
+                                            }
+                                        }}
+                                    />
+                                    <RNPickerSelect
+                                        style={{
+                                            inputIOS: styles.selectTime,
+                                            inputAndroid: styles.selectTime,
+                                        }}
+                                        value={notificationRules.customTimeUnit}
+                                        onValueChange={(value) => handleRuleChange('customTimeUnit', value)}
+                                        items={timeUnits.map((unit) => ({ label: unit.label, value: unit.value }))}
+                                        useNativeAndroidPickerStyle={false}
+                                    />
+                                </View>
+                            </View>
+                            <Text style={styles.reminderLabelAbout}>Remind me about</Text>
+                            <RNPickerSelect
+                                style={{
+                                    inputIOS: styles.selectElement,
+                                    inputAndroid: styles.selectElement,
+                                }}
+                                value={notificationRules.target}
+                                onValueChange={(value) => {
+                                    handleRuleChange('target', value);
+                                    setSelectedTask(value);
+                                }}
+                                placeholder={{ label: 'Select a Task/Category', value: 'task', enabled: !selectedTask }}
+                                items={[
+
+                                    ...tasks.map((task) => ({ label: task, value: task })),
+                                    ...categories.map((category) => ({ label: category, value: category })),
+                                ]}
+                                useNativeAndroidPickerStyle={false}
+                            />
+                            <TouchableOpacity style={styles.reminderButton} onPress={requestNotificationPermission}>
+                                <Text style={styles.reminderButtonText}>Set Reminder</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
             </View>
@@ -316,7 +367,117 @@ const styles = {
     themePopup: {
         // Define your theme popup styles here
     },
-    // ... (Other styles)
+    popupContainer: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 'auto', // Set to 50% to move the top of the container to the center
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black background
+        paddingBottom: '200%',
+    },
+    popupContent: {
+        width: '80%',
+        marginTop: '60%',
+        borderRadius: 10,
+        backgroundColor: 'white',
+        alignSelf: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlignVertical: 'center',
+        alignContent: 'center',
+        textAlign: "center",
+        shadowColor: '#ff4444',
+        shadowOffset: {
+            width: 2,
+            height: 2,
+        },
+        shadowOpacity: 0.4,
+        shadowRadius: 6,
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 8,
+        backgroundColor: '#333',
+        borderRadius: 4,
+    },
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 18,
+    },
+    setReminderText: {
+        marginTop: 10,
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    inputContainer: {
+        alignItems: 'center',
+    },
+    inputRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 0,
+    },
+    timeInput: {
+        width: '50%',
+        borderWidth: 2,
+        borderColor: '#ddd', // Add a border color
+        height: 40,
+        backgroundColor: '#F3F3F3',
+        borderRadius: 10,
+    },
+    selectTime: {
+        height: 40,
+        borderRadius: 10,
+        fontSize: 16,
+        backgroundColor: '#fff',
+        marginLeft: 5,
+        shadowColor: '#000', // Add shadow for a lifted effect
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    selectElement: {
+        width: '100%',
+        textAlign: 'center',
+        borderRadius: 10,
+        padding: 10,
+        fontSize: 16,
+        backgroundColor: '#fff',
+        marginBottom: 10,
+        shadowColor: '#000', // Add shadow for a lifted effect
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    reminderButton: {
+        width: '100%',
+        padding: 15,
+        backgroundColor: '#333',
+        alignItems: 'center',
+        borderRadius: 10,
+    },
+    reminderButtonText: {
+        color: '#fff',
+        fontSize: 18,
+    },
+    reminderLabelAbout:{
+        fontSize: 18,
+        marginTop: 30,
+        marginBottom: 30,
+    },
+    reminderLabel:{
+        fontSize: 18,
+    },
 };
 
 export default TopBar;
