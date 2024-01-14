@@ -5,10 +5,11 @@ import {
     TouchableOpacity,
     TextInput,
     ScrollView,
-    Modal,
+    Modal, Alert,
 } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import ThemePopup from './ThemePopup';
+import * as Notifications from 'expo-notifications';
 
 const TopBar = ({
                     sortOrder,
@@ -88,7 +89,7 @@ const TopBar = ({
         time: 0,
         target: 'task',
         timerId: null,
-        customTimeUnit: 'minutes',  // Initialize with a default value
+        customTimeUnit: 'minutes', // Initialize with a default value
     });
 
     const handleRuleChange = (key, value) => {
@@ -98,61 +99,91 @@ const TopBar = ({
         }));
     };
 
-    const setupNotifications = () => {
+    const setupNotifications = async () => {
         const { time, customTimeUnit, target } = notificationRules;
 
-        let timeInMilliseconds;
+        let timeInSeconds;
         if (customTimeUnit === 'minutes') {
-            timeInMilliseconds = time * 60 * 1000;
+            timeInSeconds = time * 60;
         } else if (customTimeUnit === 'days') {
-            timeInMilliseconds = time * 24 * 60 * 60 * 1000;
+            timeInSeconds = time * 24 * 60 * 60;
         } else {
             alert('Unsupported time unit');
             return;
         }
 
-        if ('Notification' in window) {
-            Notification.requestPermission().then((permission) => {
-                if (permission === 'granted') {
-                    // Notification permission granted, set up the notification timer
-                    const notificationTimer = setTimeout(() => {
-                        new Notification(`Reminder for ${target}`, {
-                            body: `It's time to check your ${target}.`,
-                        });
-                    }, timeInMilliseconds);
+        if (timeInSeconds > 0) {
+            try {
+                const identifier = await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: `Reminder for ${target}`,
+                        body: `It's time to check your ${target}.`,
+                    },
+                    trigger: {
+                        seconds: timeInSeconds,
+                        repeats: false,
+                    },
+                });
 
-                    handleRuleChange('timerId', notificationTimer);
-                } else {
-                    alert('Notification permission denied');
-                }
-            });
+                handleRuleChange('timerId', identifier);
+                alert('Reminder set');
+            } catch (error) {
+                console.error('Failed to schedule notification:', error);
+                alert('Failed to schedule notification');
+            }
         } else {
-            alert('Notifications not supported in this browser');
+            alert('Invalid time for reminder');
         }
     };
 
 
-    const requestNotificationPermission = async () => {
-        try {
-            await Notification.requestPermission();
-            setupNotifications();
-        } catch (error) {
-            alert('Notification permission denied');
-        }
-    };
-
+    const [notification, setNotification] = useState(null);
     useEffect(() => {
-        // Cleanup function to clear the timer on component unmount
+        // Cleanup function to clear the scheduled notification on component unmount
         return () => {
-            clearTimeout(notificationRules.timerId);
+            if (notificationRules.timerId) {
+                Notifications.cancelScheduledNotificationAsync(notificationRules.timerId);
+            }
         };
     }, [notificationRules.timerId]);
+
+    useEffect(() => {
+        const subscription = Notifications.addNotificationReceivedListener(
+            (notification) => {
+                setNotification(notification);
+            }
+        );
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+
+    // Display an alert when a notification is received
+    useEffect(() => {
+        if (notification) {
+            Alert.alert(
+                notification.request.content.title,
+                notification.request.content.body
+            );
+            setNotification(null);
+        }
+    }, [notification]);
 
     const timeUnits = [
         { label: 'Minutes', value: 'minutes' },
         { label: 'Days', value: 'days' },
     ];
 
+    const requestNotificationPermission = async () => {
+        try {
+            await Notifications.requestPermissionsAsync();  // Corrected line
+            await setupNotifications();
+            toggleRulesPopup();
+        } catch (error) {
+            alert('Notification permission denied');
+        }
+    };
     const closeMenuOnOutsideClick = (event) => {
         if (
             !event.target.closest('.dropdown-menu') &&
@@ -164,11 +195,6 @@ const TopBar = ({
             setShowMenu(false);
             setShowThemePopup(false);
         }
-    };
-
-    const saveAsPDF = () => {
-        // Assuming you have the required library for generating PDF (html2pdf.js) installed
-        // Make sure to handle the PDF generation logic accordingly
     };
 
     return (
