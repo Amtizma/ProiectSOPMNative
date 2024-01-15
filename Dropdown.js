@@ -20,7 +20,6 @@ const Dropdown = ({ options, onSelectColor }) => {
         const selectedColor = getColour(value);
         setSelectedOption(value);
         setIsOpen(false);
-        console.log(selectedColor);
         onSelectColor(selectedColor); // Transmit the color to the parent component
     };
 
@@ -49,7 +48,6 @@ const Dropdown = ({ options, onSelectColor }) => {
 
 const styles = StyleSheet.create({
     dropdown: {
-        position: 'relative',
         marginBottom: 10,
     },
     dropdownHeader: {
@@ -59,6 +57,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        backgroundColor: '#C9C9C9FF',
         alignItems: 'center',
     },
     arrow: {
@@ -72,8 +71,6 @@ const styles = StyleSheet.create({
         borderColor: 'black',
     },
     dropdownList: {
-        position: 'absolute',
-        top: 40, // Adjust this based on your layout
         left: 0,
         borderWidth: 1,
         borderColor: 'black',

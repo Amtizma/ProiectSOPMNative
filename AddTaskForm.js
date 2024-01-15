@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import Dropdown from './Dropdown';
 import { cats } from './Category';
-
-const AddTaskForm = ({ onAddTask, category, editingTask, onDeleteTask, resetEditingTask }) => {
+import {LinearGradient} from 'expo-linear-gradient';
+const AddTaskForm = ({ onAddTask, category, editingTask, onDeleteTask, resetEditingTask, topBarColor }) => {
     const handledCats = cats.map((cat) => cat.cat);
-
     const [selectedColor, setSelectedColor] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [task, setTask] = useState('');
     const [name, setName] = useState('');
     const [priority, setPriority] = useState('');
+    const [selectedPriority, setSelectedPriority] = useState('');
 
     const handleButtonClick = () => {
         setShowForm(true);
@@ -53,6 +53,98 @@ const AddTaskForm = ({ onAddTask, category, editingTask, onDeleteTask, resetEdit
         setShowForm(false);
         resetEditingTask();
     };
+    const getPriorityButtonStyle = (priority) => {
+        return [
+            styles.priorityButton,
+            selectedPriority === priority ? styles.selectedPriorityButton : null,
+        ];
+    };
+    const styles = StyleSheet.create({
+        taskFormContainer: {
+            flex: 1,
+        },
+        formContainer: {
+            paddingHorizontal: 16,
+        },
+        inputContainer: {
+            marginBottom: 10,
+        },
+        categoryNameTextbox: {
+            height: 40,
+            borderColor: 'gray',
+            borderWidth: 1,
+            marginBottom: 10,
+            paddingHorizontal: 10,
+            borderRadius: 5,
+        },
+        gradientStyle:{
+            flex: 1,
+            justifyContent: 'space-between',
+            margin: 5,
+            borderRadius: 5,
+        },
+        priorityOptions: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+        },
+        priorityButton: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 40,
+            borderRadius: 5,
+        },
+        priorityButtonText: {
+            color: 'white',
+        },
+        dropdown: {
+            marginBottom: 10,
+        },
+        actionButtons: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        confirmButton: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 40,
+            borderRadius: 5,
+            backgroundColor: topBarColor,
+        },
+        confirmButtonText: {
+            color: 'white',
+        },
+        cancelButton: {
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 40,
+            borderRadius: 5,
+            marginLeft: 10,
+        },
+        cancelButtonText: {
+            color: 'black',
+        },
+        addButton: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 40,
+            borderRadius: 5,
+            backgroundColor: topBarColor,
+            marginTop: 10,
+        },
+        addButtonText: {
+            color: 'white',
+        },
+        selectedPriorityButton: {
+            color: '#fff',
+            borderWidth: 3,
+            borderColor: '#000',
+            boxShadow: '0 0 5px rgba(0, 0, 0, 0.5)',
+        },
+    });
 
     return (
         <View style={styles.taskFormContainer}>
@@ -75,31 +167,61 @@ const AddTaskForm = ({ onAddTask, category, editingTask, onDeleteTask, resetEdit
                         />
                     </View>
                     <View style={styles.priorityOptions}>
-                        <TouchableOpacity
-                            style={[styles.priorityButton, { backgroundColor: priority === 'LOW' ? 'green' : 'transparent' }]}
-                            onPress={() => setPriority('LOW')}
+                        <LinearGradient
+                            colors={['green', topBarColor]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.gradientStyle}
                         >
+                            <TouchableOpacity
+                                style={getPriorityButtonStyle('LOW')}
+                                onPress={() => {
+                                    setPriority('LOW');
+                                    setSelectedPriority('LOW');
+                                }}
+                            >
                             <Text style={styles.priorityButtonText}>LOW</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.priorityButton, { backgroundColor: priority === 'MEDIUM' ? 'yellow' : 'transparent' }]}
-                            onPress={() => setPriority('MEDIUM')}
+                        </LinearGradient>
+                        <LinearGradient
+                            colors={['orange', topBarColor]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.gradientStyle}
                         >
-                            <Text style={styles.priorityButtonText}>MEDIUM</Text>
+                            <TouchableOpacity
+                                style={getPriorityButtonStyle('MEDIUM')}
+                                onPress={() => {
+                                    setPriority('MEDIUM');
+                                    setSelectedPriority('MEDIUM');
+                                }}
+                            >
+                        <Text style={styles.priorityButtonText}>MEDIUM</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.priorityButton, { backgroundColor: priority === 'HIGH' ? 'red' : 'transparent' }]}
-                            onPress={() => setPriority('HIGH')}
+                        </LinearGradient>
+                        <LinearGradient
+                            colors={['red', topBarColor]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.gradientStyle}
                         >
+                            <TouchableOpacity
+                                style={getPriorityButtonStyle('HIGH')}
+                                onPress={() => {
+                                    setPriority('HIGH');
+                                    setSelectedPriority('HIGH');
+                                }}
+                            >
                             <Text style={styles.priorityButtonText}>HIGH</Text>
                         </TouchableOpacity>
+                        </LinearGradient>
                     </View>
                     <View style={styles.dropdown}>
                         <Dropdown options={handledCats} onSelectColor={handleSelectColor} />
                     </View>
                     <View style={styles.actionButtons}>
                         <TouchableOpacity
-                            style={[styles.confirmButton, { backgroundColor: selectedColor || priority ? 'lightblue' : 'grey' }]}
+                            style={styles.confirmButton}
                             onPress={handleSubmit}
                             disabled={!selectedColor && !priority}
                         >
@@ -119,77 +241,5 @@ const AddTaskForm = ({ onAddTask, category, editingTask, onDeleteTask, resetEdit
     );
 };
 
-const styles = StyleSheet.create({
-    taskFormContainer: {
-        flex: 1,
-    },
-    formContainer: {
-        paddingHorizontal: 16,
-    },
-    inputContainer: {
-        marginBottom: 10,
-    },
-    categoryNameTextbox: {
-        height: 40,
-        borderColor: 'gray',
-        borderWidth: 1,
-        marginBottom: 10,
-        paddingHorizontal: 10,
-    },
-    priorityOptions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    priorityButton: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 40,
-        borderRadius: 5,
-    },
-    priorityButtonText: {
-        color: 'white',
-    },
-    dropdown: {
-        marginBottom: 10,
-    },
-    actionButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    confirmButton: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 40,
-        borderRadius: 5,
-    },
-    confirmButtonText: {
-        color: 'white',
-    },
-    cancelButton: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 40,
-        borderRadius: 5,
-        marginLeft: 10,
-    },
-    cancelButtonText: {
-        color: 'black',
-    },
-    addButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 40,
-        borderRadius: 5,
-        backgroundColor: 'lightblue',
-        marginTop: 10,
-    },
-    addButtonText: {
-        color: 'white',
-    },
-});
 
 export default AddTaskForm;

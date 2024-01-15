@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Animated } from 'react-native';
 import Collapsible from 'react-native-collapsible';
 import Categories from './CategoryDef';
 import AddNewCategory from './CategoryForm';
@@ -8,11 +8,20 @@ import { _pastelColors, assignBackgroundColor } from "./CategoryDef";
 
 var cats = [];
 
-const CategoryPage = () => {
+const CategoryPage = ({topBarColor}) => {
     const [categories, setCategories] = useState(['Category 1']);
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const fadeAnim = new Animated.Value(0);
 
     cats = categories.map((category, index) => new Category(category, _pastelColors[index % _pastelColors.length]));
+
+    useEffect(() => {
+        Animated.timing(fadeAnim, {
+            toValue: isCollapsed ? 0 : 1,
+            duration: 500, // Adjust the duration of the fade effect
+            useNativeDriver: false,
+        }).start();
+    }, [isCollapsed]);
 
     const addCategory = (newCategory) => {
         setCategories((prevCategories) => {
@@ -33,35 +42,55 @@ const CategoryPage = () => {
         setIsCollapsed(!isCollapsed);
     };
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.categorySection}>
-                <TouchableOpacity style={styles.linesContainer} onPress={toggleCollapse}>
-                    <View style={styles.categoryMenu}><Text style={styles.categoryMenuText}> Category Menu </Text></View>
-                    <View style={styles.horizontalLine}><Text> - </Text></View>
-                    <View style={styles.horizontalLine}><Text> - </Text></View>
-                    <View style={styles.horizontalLine}><Text> - </Text></View>
+    const containerStyle = {
+        ...styles.container,
+        backgroundColor: fadeAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: ['lightgrey', 'white'],
+        }),
+    };
 
-                </TouchableOpacity>
-                <Collapsible collapsed={isCollapsed}>
-                    <Categories categories={categories} onDelete={deleteCategory} />
-                    <AddNewCategory addCategory={addCategory} />
-                </Collapsible>
-            </View>
-        </View>
+    return (
+        <Animated.View style={containerStyle}>
+            <TouchableOpacity style={styles.linesContainer} onPress={toggleCollapse}>
+                <View style={styles.horizontalLine}><Text> - </Text></View>
+                <View style={styles.horizontalLine}><Text> - </Text></View>
+                <View style={styles.horizontalLine}><Text> - </Text></View>
+            </TouchableOpacity>
+            <Collapsible collapsed={isCollapsed}>
+                <Categories categories={categories} onDelete={deleteCategory} />
+                <AddNewCategory addCategory={addCategory} topBarColor = {topBarColor} />
+            </Collapsible>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'column',
+        justifyContent: "center",
+        backgroundColor: "lightgrey",
+        padding: 10,
+        borderRadius: 8,
+        alignSelf: 'stretch',
+        margin: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    activeColumn: {
+        borderColor: '#3498db',
+        borderWidth: 2,
     },
     categorySection: {
         flex: 1,
     },
     linesContainer:{
-        backgroundColor: "lightgrey",
         textAlign: "center",
     },
     horizontalLine: {

@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     TextInput,
     ScrollView,
-    Modal, Alert,
+    Modal, Alert, Linking
 } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import ThemePopup from './ThemePopup';
@@ -17,6 +17,8 @@ const TopBar = ({
                     tasks,
                     categories,
                     onUpdateLists,
+                    setTopBarColor,
+                    setBackgroundColor
                 }) => {
     const [showMenu, setShowMenu] = useState(false);
     const [showThemePopup, setShowThemePopup] = useState(false);
@@ -25,11 +27,13 @@ const TopBar = ({
     const [showFeedbackPopup, setShowFeedbackPopup] = useState(false);
     const [showShareMenu, setShowShareMenu] = useState(false);
     const [saveAsPdfClicked, setSaveAsPdfClicked] = useState(false);
-
+    const [feedbackText, setFeedbackText] = useState('');
     const [showRulesPopup, setShowRulesPopup] = useState(false);
     const [selectedType, setSelectedType] = useState('task'); // 'task' or 'category'
     const [selectedTask, setSelectedTask] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [reminderButtonColor, setReminderButtonColor] = useState("#c1dddf");
+    const [activeButtonColor, setActiveButtonColor] = useState("lightblue");
     const toggleRulesPopup = () => {
         setShowRulesPopup(!showRulesPopup);
         onUpdateLists(); // Call the function to update lists in the App component
@@ -76,13 +80,24 @@ const TopBar = ({
         setShowFilters(false); // Close filters menu
     };
 
-    const sendFeedback = () => {
-        const feedbackText = document.getElementById('feedback-textarea').value;
+    const sendFeedback = async () => {
         const emailSubject = 'Feedback for Your App';
         const mailtoLink = `mailto:dianastphx@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(feedbackText)}`;
-        window.location.href = mailtoLink;
-        toggleFeedbackPopup(); // Close the feedback popup after sending
+
+        try {
+            const supported = await Linking.canOpenURL(mailtoLink);
+
+            if (supported) {
+                await Linking.openURL(mailtoLink);
+                toggleFeedbackPopup(); // Close the feedback popup after sending
+            } else {
+                console.error("Can't open the email client.");
+            }
+        } catch (error) {
+            console.error('Error opening the email client:', error);
+        }
     };
+
 
     // Add necessary state and functions
     const [notificationRules, setNotificationRules] = useState({
@@ -196,6 +211,248 @@ const TopBar = ({
             setShowThemePopup(false);
         }
     };
+    const changeTheme = (topbarColor, backgroundColor) =>{
+        setTopBarColor(topbarColor);
+        setBackgroundColor(backgroundColor);
+        setReminderButtonColor(topbarColor);
+        setActiveButtonColor(backgroundColor);
+
+    };
+
+    const styles = {
+        topBar: {
+            marginTop: 50, // Adjust the marginTop to move the topBar lower
+            padding: 10, // Add some padding to the topBar
+            flexDirection: 'column', // Arrange children in a column
+            alignItems: 'center', // Align items to the center of the container
+        },
+        leftSection: {
+            alignItems: 'flex-start', // Align items to the start of the container
+        },
+        charterTitle: {
+            fontSize: 18, // Adjust the font size as needed
+            fontWeight: 'bold', // Set the font weight if needed
+        },
+        rightSection: {
+            marginTop: 10, // Add some space between Charter for and buttons
+        },
+        buttons: {
+            flexDirection: 'row', // Arrange buttons in a row
+            justifyContent: 'center', // Center buttons horizontally
+        },
+        button: {
+            paddingVertical: 10, // Add padding to the vertical axis
+            paddingHorizontal: 20, // Add padding to the horizontal axis
+            marginHorizontal: 5, // Add margin between buttons
+            backgroundColor: '#C9C9C9FF', // Set a background color if needed
+            borderRadius: 5, // Add border radius for rounded corners
+        },
+        buttonText: {
+            color: '#ffffff', // Set the text color
+            textAlign: 'center',
+        },
+        activeButton: {
+            backgroundColor: activeButtonColor, // Set a different color for active buttons if needed
+        },
+        dropdownMenu: {
+            position: 'absolute',
+            width: "216%",
+            left: 0,
+            backgroundColor: '#ffffff',
+            borderRadius: 8, // Add more rounded corners
+            padding: 10,
+            marginTop: 30,
+            elevation: 10,
+            shadowColor: '#000', // Add shadow for a lifted effect
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            zIndex: 200,
+        },
+        dropdownMenu2: {
+            position: 'absolute',
+            width: "150%",
+            left: 0,
+            backgroundColor: '#ffffff',
+            borderRadius: 8, // Add more rounded corners
+            padding: 10,
+            marginTop: 30,
+            elevation: 10,
+            shadowColor: '#000', // Add shadow for a lifted effect
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            zIndex: 200,
+        },
+        dropdownMenu3: {
+            position: 'absolute',
+            width: "140%",
+            left: 0,
+            backgroundColor: '#ffffff',
+            borderRadius: 8, // Add more rounded corners
+            padding: 10,
+            marginTop: 30,
+            elevation: 10,
+            shadowColor: '#000', // Add shadow for a lifted effect
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            zIndex: 200,
+        },
+        themePopup: {
+            // Define your theme popup styles here
+        },
+        popupContainer: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 'auto', // Set to 50% to move the top of the container to the center
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black background
+            paddingBottom: '200%',
+        },
+        popupContent: {
+            width: '80%',
+            marginTop: '60%',
+            borderRadius: 10,
+            backgroundColor: 'white',
+            alignSelf: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlignVertical: 'center',
+            alignContent: 'center',
+            textAlign: "center",
+            shadowColor: '#ff4444',
+            shadowOffset: {
+                width: 2,
+                height: 2,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 6,
+        },
+        closeButton: {
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            padding: 8,
+            backgroundColor: '#333',
+            borderRadius: 4,
+        },
+        closeButtonText: {
+            color: '#fff',
+            fontSize: 18,
+        },
+        setReminderText: {
+            marginTop: 10,
+            fontSize: 24,
+            fontWeight: 'bold',
+        },
+        setChooseAThemeText: {
+            marginBottom: 10,
+            fontSize: 24,
+            fontWeight: 'bold',
+        },
+        inputContainer: {
+            alignItems: 'center',
+        },
+        inputRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 0,
+        },
+        timeInput: {
+            width: '50%',
+            borderWidth: 2,
+            borderColor: '#ddd', // Add a border color
+            height: 40,
+            backgroundColor: '#F3F3F3',
+            borderRadius: 10,
+        },
+        selectTime: {
+            height: 40,
+            borderRadius: 10,
+            fontSize: 16,
+            backgroundColor: '#fff',
+            marginLeft: 5,
+            shadowColor: '#000', // Add shadow for a lifted effect
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+        },
+        selectElement: {
+            width: '100%',
+            textAlign: 'center',
+            borderRadius: 10,
+            padding: 10,
+            fontSize: 16,
+            backgroundColor: '#fff',
+            marginBottom: 10,
+            shadowColor: '#000', // Add shadow for a lifted effect
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+        },
+        reminderButton: {
+            width: '100%',
+            padding: 15,
+            backgroundColor: reminderButtonColor,
+            alignItems: 'center',
+            borderRadius: 10,
+        },
+        reminderButtonText: {
+            color: '#fff',
+            fontSize: 18,
+        },
+        reminderLabelAbout:{
+            fontSize: 18,
+            marginTop: 30,
+            marginBottom: 30,
+        },
+        reminderLabel:{
+            fontSize: 18,
+        },
+        themeButtons: {
+            flexDirection: 'column',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            marginBottom: 10,
+        },
+        themeButton: {
+            textAlign: 'center',
+            padding: 20,
+            margin: 5,
+            borderRadius: 5,
+        },
+        feedbackTextarea:{
+            padding: 50,
+            borderWidth: 2,
+            borderRadius: 10,
+            margin: 10,
+            width: "90%",
+            textAlign: 'center',
+        },
+        filterButtons: {
+            padding: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: '#ecf0f1',
+        },
+    };
 
     return (
         <View>
@@ -213,21 +470,18 @@ const TopBar = ({
                             onPress={toggleAuto}>
                             <Text>Automation</Text>
                             {showAuto && (
-                                <View style={styles.dropdownMenu}>
+                                <View style={styles.dropdownMenu2}>
                                     <ScrollView>
-                                        <TouchableOpacity onPress={toggleRulesPopup}>
+                                        <TouchableOpacity style={styles.filterButtons} onPress={toggleRulesPopup}>
                                             <Text>Reminders</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={toggleFeedbackPopup}>
+                                        <TouchableOpacity style={styles.filterButtons} onPress={toggleFeedbackPopup}>
                                             <Text>Send feedback</Text>
                                         </TouchableOpacity>
                                     </ScrollView>
                                 </View>
                             )}
                         </TouchableOpacity>
-
-                        {/* ... (Other buttons) */}
-
                         <TouchableOpacity
                             style={[
                                 styles.button,
@@ -239,14 +493,17 @@ const TopBar = ({
                                 <View style={styles.dropdownMenu}>
                                     <ScrollView>
                                         <TouchableOpacity
+                                            style={styles.filterButtons}
                                             onPress={() => setSortOrder('default')}>
                                             <Text>By Default</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
+                                            style={styles.filterButtons}
                                             onPress={() => setSortOrder('byTasks')}>
                                             <Text>By No. of tasks</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
+                                            style={styles.filterButtons}
                                             onPress={() => setSortOrder('byName')}>
                                             <Text>By Column Name</Text>
                                         </TouchableOpacity>
@@ -261,10 +518,10 @@ const TopBar = ({
                             ]}
                             onPress={toggleMenu}>
                             <Text>
-
+                            Change theme
                             </Text>
                             {showMenu && (
-                                <View style={styles.dropdownMenu}>
+                                <View style={styles.dropdownMenu3}>
                                     <ScrollView>
                                         <TouchableOpacity onPress={toggleThemePopup}>
                                             <Text>Change Theme</Text>
@@ -332,178 +589,63 @@ const TopBar = ({
                         </View>
                     </View>
                 )}
+                {showFeedbackPopup && (
+                    <View style={styles.popupContainer}>
+                        <View style={styles.popupContent}>
+                            <TouchableOpacity style={styles.closeButton} onPress={toggleFeedbackPopup}>
+                                <Text style={styles.closeButtonText}>X</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.setReminderText}>Give Feedback</Text>
+                            <Text>What would you like to share with us?</Text>
+                            <TextInput
+                                style={styles.feedbackTextarea}
+                                placeholder="Write your feedback here..."
+                                multiline
+                                value={feedbackText}
+                                onChangeText={text => setFeedbackText(text)}
+                            />
+                            <TouchableOpacity
+                                style={{ ...styles.reminderButton }}
+                                onPress={sendFeedback}>
+                                <Text style={styles.reminderButtonText}>Send</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+                {showThemePopup && (
+                    <View style={styles.popupContainer}>
+                        <View style={styles.popupContent}>
+                            <Text style={styles.setChooseAThemeText}>Choose a Theme</Text>
+                            <View style={styles.themeButtons}>
+                                <TouchableOpacity style={[styles.themeButton, { backgroundColor: 'lightblue' }]} onPress={() => changeTheme('#c1dddf', 'lightblue')}>
+                                    <Text style={styles.buttonText}>Default</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.themeButton, { backgroundColor: 'pink' }]} onPress={() => changeTheme('#FF90BC', '#F2B3CD')}>
+                                    <Text style={styles.buttonText}>Barbie</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.themeButton, { backgroundColor: 'gray' }]} onPress={() => changeTheme('#4F4A45', '#525C62')}>
+                                    <Text style={styles.buttonText}>Star Wars</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.themeButton, { backgroundColor: '#860A35' }]} onPress={() => changeTheme('#17B169', '#BF1936')}>
+                                    <Text style={styles.buttonText}>Christmas</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.themeButton, { backgroundColor: '#ACE1AF' }]} onPress={() => changeTheme('#ACE1AF', '#C8C79A')}>
+                                    <Text style={styles.buttonText}>Nature</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.themeButton, { backgroundColor: '#89CFF0' }]} onPress={() => changeTheme('#89CFF0', '#185A96')}>
+                                    <Text style={styles.buttonText}>Under the sea</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <TouchableOpacity style={styles.closeButton} onPress={toggleThemePopup}>
+                                <Text style={styles.closeButtonText}>X</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+            )}
             </View>
         </View>
     );
 };
 
-const styles = {
-    topBar: {
-        marginTop: 50, // Adjust the marginTop to move the topBar lower
-        padding: 10, // Add some padding to the topBar
-        flexDirection: 'column', // Arrange children in a column
-        alignItems: 'center', // Align items to the center of the container
-    },
-    leftSection: {
-        alignItems: 'flex-start', // Align items to the start of the container
-    },
-    charterTitle: {
-        fontSize: 18, // Adjust the font size as needed
-        fontWeight: 'bold', // Set the font weight if needed
-    },
-    rightSection: {
-        marginTop: 10, // Add some space between Charter for and buttons
-    },
-    buttons: {
-        flexDirection: 'row', // Arrange buttons in a row
-        justifyContent: 'center', // Center buttons horizontally
-    },
-    button: {
-        paddingVertical: 10, // Add padding to the vertical axis
-        paddingHorizontal: 20, // Add padding to the horizontal axis
-        marginHorizontal: 5, // Add margin between buttons
-        backgroundColor: '#3498db', // Set a background color if needed
-        borderRadius: 5, // Add border radius for rounded corners
-    },
-    buttonText: {
-        color: '#ffffff', // Set the text color
-    },
-    activeButton: {
-        backgroundColor: '#2c3e50', // Set a different color for active buttons if needed
-    },
-    dropdownMenu: {
-        position: 'absolute',
-        top: '100%',
-        width: "200%",
-        left: 0,
-        backgroundColor: '#ffffff',
-        borderRadius: 8, // Add more rounded corners
-        padding: 10,
-        marginTop: 5,
-        elevation: 4,
-        shadowColor: '#000', // Add shadow for a lifted effect
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        zIndex: 200,
-    },
-    themePopup: {
-        // Define your theme popup styles here
-    },
-    popupContainer: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 'auto', // Set to 50% to move the top of the container to the center
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black background
-        paddingBottom: '200%',
-    },
-    popupContent: {
-        width: '80%',
-        marginTop: '60%',
-        borderRadius: 10,
-        backgroundColor: 'white',
-        alignSelf: 'center',
-        justifyContent: 'center',
-        alignItems: 'center',
-        textAlignVertical: 'center',
-        alignContent: 'center',
-        textAlign: "center",
-        shadowColor: '#ff4444',
-        shadowOffset: {
-            width: 2,
-            height: 2,
-        },
-        shadowOpacity: 0.4,
-        shadowRadius: 6,
-    },
-    closeButton: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        padding: 8,
-        backgroundColor: '#333',
-        borderRadius: 4,
-    },
-    closeButtonText: {
-        color: '#fff',
-        fontSize: 18,
-    },
-    setReminderText: {
-        marginTop: 10,
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    inputContainer: {
-        alignItems: 'center',
-    },
-    inputRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 0,
-    },
-    timeInput: {
-        width: '50%',
-        borderWidth: 2,
-        borderColor: '#ddd', // Add a border color
-        height: 40,
-        backgroundColor: '#F3F3F3',
-        borderRadius: 10,
-    },
-    selectTime: {
-        height: 40,
-        borderRadius: 10,
-        fontSize: 16,
-        backgroundColor: '#fff',
-        marginLeft: 5,
-        shadowColor: '#000', // Add shadow for a lifted effect
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    selectElement: {
-        width: '100%',
-        textAlign: 'center',
-        borderRadius: 10,
-        padding: 10,
-        fontSize: 16,
-        backgroundColor: '#fff',
-        marginBottom: 10,
-        shadowColor: '#000', // Add shadow for a lifted effect
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    reminderButton: {
-        width: '100%',
-        padding: 15,
-        backgroundColor: '#333',
-        alignItems: 'center',
-        borderRadius: 10,
-    },
-    reminderButtonText: {
-        color: '#fff',
-        fontSize: 18,
-    },
-    reminderLabelAbout:{
-        fontSize: 18,
-        marginTop: 30,
-        marginBottom: 30,
-    },
-    reminderLabel:{
-        fontSize: 18,
-    },
-};
 
 export default TopBar;

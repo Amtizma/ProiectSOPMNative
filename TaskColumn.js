@@ -1,8 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, PanResponder, Animated } from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView,
+    StyleSheet,
+    PanResponder,
+    Animated,
+    LayoutAnimation
+} from 'react-native';
 import AddTaskForm from './AddTaskForm';
 
-const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDeleteColumn, onMoveTask, onEditTask, setShowForm, setScrollEnabled }) => {
+const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDeleteColumn, onMoveTask, onEditTask, setShowForm, setScrollEnabled, topBarColor}) => {
     const [activeColumn, setActiveColumn] = useState('');
     const [openOptionMenu, setOpenOptionMenu] = useState(null);
     const [hoveredTask, setHoveredTask] = useState(null);
@@ -10,7 +19,12 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
     const [filterType, setFilterType] = useState('default');
     const [editingTask, setEditingTask] = useState(null);
     const [isFilterButtonClicked, setIsFilterButtonClicked] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
+    const toggleOpen = () => {
+        setIsOpen(value => !value);
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }
     const resetEditingTask = () => {
         setEditingTask(null);
     };
@@ -27,6 +41,7 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
         setShowFilterOptions(prevShowFilterOptions => !prevShowFilterOptions);
         setOpenOptionMenu(null);
         setIsFilterButtonClicked(prevIsClicked => !prevIsClicked);
+        toggleOpen();
     };
 
     const buttonRef = useRef(null);
@@ -123,6 +138,127 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
 
     const filteredTasks = tasks.slice().sort((a, b) => applyFilter(a).localeCompare(applyFilter(b)));
 
+    const styles = StyleSheet.create({
+        taskColumn: {
+            flex: 1,
+            justifyContent: "center",
+            backgroundColor: '#F0F0F0',
+            padding: 10,
+            borderRadius: 8,
+            alignSelf: 'stretch',
+            margin: 10,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+        },
+        activeColumn: {
+            borderColor: '#3498db',
+            borderWidth: 2,
+        },
+        deleteColumnButton: {
+            position: 'absolute',
+            top: 5,
+            right: 5,
+            backgroundColor: 'red',
+            padding: 5,
+            borderRadius: 5,
+            zIndex: 1,
+        },
+        deleteColumnButtonText: {
+            color: 'white',
+            fontWeight: 'bold',
+        },
+        filterButton: {
+            backgroundColor: '#C9C9C9FF',
+            padding: 10,
+            borderRadius: 5,
+        },
+        clickedFilterButton: {
+            backgroundColor: topBarColor,
+        },
+        dropdownMenu: {
+            backgroundColor: '#fff',
+            borderRadius: 5,
+            padding: 10,
+            elevation: 3,
+        },
+        filterButtons: {
+            padding: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: '#ecf0f1',
+        },
+        categoryTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginVertical: 10,
+            textAlign: 'center',
+        },
+        task: {
+            backgroundColor: '#fff',
+            padding: 15,
+            borderRadius: 8,
+            marginVertical: 5,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            elevation: 3,
+        },
+        nameAndCircle: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        priorityCircle: {
+            width: 20,
+            height: 20,
+            borderRadius: 10,
+            marginRight: 10,
+        },
+        high: {
+            backgroundColor: '#e74c3c',
+        },
+        medium: {
+            backgroundColor: '#f39c12',
+        },
+        low: {
+            backgroundColor: '#2ecc71',
+        },
+        taskName: {
+            fontSize: 16,
+        },
+        optionButton: {
+            marginLeft: 'auto',
+        },
+        taskOptions: {
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            backgroundColor: '#fff',
+            borderRadius: 5,
+            marginTop: 5,
+            elevation: 3,
+        },
+        optionMenu: {
+            padding: 10,
+        },
+        taskDate: {
+            fontSize: 12,
+            fontStyle: 'italic',
+        },
+        taskDescription: {
+            marginTop: 5,
+        },
+        formContainer: {
+            marginTop: 20,
+            flex: 0,
+        },
+    });
+
+
     return (
         <Animated.View
             {...panResponder.panHandlers}
@@ -132,7 +268,7 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
                 { transform: [{ translateX: swipeX }] },
             ]}
         >
-            <TouchableOpacity onPress={toggleFilterOptions} style={[styles.filterButton, isFilterButtonClicked ? styles.clickedFilterButton : null]}>
+            <TouchableOpacity onPress={toggleFilterOptions} activeOpacity={0.4} style={[styles.filterButton, isFilterButtonClicked ? styles.clickedFilterButton : null]}>
                 <Text>Filter Tasks by</Text>
             </TouchableOpacity>
             {showFilterOptions && (
@@ -148,7 +284,7 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
                     </TouchableOpacity>
                 </ScrollView>
             )}
-            <Text style={styles.categoryTitle}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
+            <Text style={[styles.categoryTitle]}>{category.charAt(0).toUpperCase() + category.slice(1)}</Text>
             {filteredTasks.map((task) => (
                 <View
                     key={task.id}
@@ -213,132 +349,12 @@ const TaskColumn = ({ category, tasks, categories, onAddTask, onDeleteTask, onDe
                     onDeleteTask={onDeleteTask}
                     setShowForm={setShowForm}
                     resetEditingTask={resetEditingTask}
+                    topBarColor = {topBarColor}
                 />
             </View>
         </Animated.View>
     );
 };
 
-const styles = StyleSheet.create({
-    taskColumn: {
-        flex: 1,
-        justifyContent: "center",
-        backgroundColor: '#F0F0F0',
-        padding: 10,
-        borderRadius: 8,
-        alignSelf: 'stretch',
-        margin: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    activeColumn: {
-        borderColor: '#3498db',
-        borderWidth: 2,
-    },
-    deleteColumnButton: {
-        position: 'absolute',
-        top: 5,
-        right: 5,
-        backgroundColor: 'red',
-        padding: 5,
-        borderRadius: 5,
-        zIndex: 1,
-    },
-    deleteColumnButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    filterButton: {
-        backgroundColor: '#3498db',
-        padding: 10,
-        borderRadius: 5,
-        marginVertical: 5,
-    },
-    clickedFilterButton: {
-        backgroundColor: '#2980b9',
-    },
-    dropdownMenu: {
-        backgroundColor: '#fff',
-        borderRadius: 5,
-        marginTop: 5,
-        padding: 10,
-        elevation: 3,
-    },
-    filterButtons: {
-        padding: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ecf0f1',
-    },
-    categoryTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginVertical: 10,
-        textAlign: 'center',
-    },
-    task: {
-        backgroundColor: '#fff',
-        padding: 15,
-        borderRadius: 8,
-        marginVertical: 5,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        elevation: 3,
-    },
-    nameAndCircle: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    priorityCircle: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        marginRight: 10,
-    },
-    high: {
-        backgroundColor: '#e74c3c',
-    },
-    medium: {
-        backgroundColor: '#f39c12',
-    },
-    low: {
-        backgroundColor: '#2ecc71',
-    },
-    taskName: {
-        fontSize: 16,
-    },
-    optionButton: {
-        marginLeft: 'auto',
-    },
-    taskOptions: {
-        position: 'absolute',
-        top: '100%',
-        right: 0,
-        backgroundColor: '#fff',
-        borderRadius: 5,
-        marginTop: 5,
-        elevation: 3,
-    },
-    optionMenu: {
-        padding: 10,
-    },
-    taskDate: {
-        fontSize: 12,
-        fontStyle: 'italic',
-    },
-    taskDescription: {
-        marginTop: 5,
-    },
-    formContainer: {
-        marginTop: 20,
-        flex: 0,
-    },
-});
 
 export default TaskColumn;

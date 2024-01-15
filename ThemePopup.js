@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     themeButton: {
-        padding: 10,
+        padding: 30,
         margin: 5,
         borderRadius: 5,
     },

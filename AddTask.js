@@ -5,14 +5,14 @@ import AddColumnPopup from './AddColumnPopup';
 
 let tsks = [];
 
-function AddTask({ sortOrder, setSortOrder }) {
-    const [scrollEnabled, setScrollEnabled] = useState(true);
+function AddTask({ sortOrder, setSortOrder, topBarColor}) {
     const [tasks, setTasks] = useState({
         todo: [],
         ongoing: [],
         done: [],
     });
     const [showForm, setShowForm] = useState(false);
+    const [scrollEnabled, setScrollEnabled] = useState(true);
 
     const moveTask = (sourceCategory, taskId, targetCategory) => {
         setTasks((prevTasks) => {
@@ -104,10 +104,37 @@ function AddTask({ sortOrder, setSortOrder }) {
             return Object.keys(taskCounts).sort((a, b) => taskCounts[b] - taskCounts[a]);
         }
     };
+    const styles = StyleSheet.create({
+        taskContainers: {
+        },
+        taskColumns: {
+            flexDirection: 'column',
+        },
+        addColumnButton: {
+            borderWidth: 1,
+            borderColor: 'black',
+            padding: 10,
+            margin: 10,
+            borderRadius: 5,
+            backgroundColor: topBarColor,
+        },
+        addColumnPopupOverlay: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        addColumnPopup: {
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 5,
+        },
+    });
+
 
     return (
         <View style={styles.taskContainers}>
-            <ScrollView  scrollEnabled={scrollEnabled} contentContainerStyle={styles.taskColumns} >
+            <View contentContainerStyle={styles.taskColumns} >
                 {getSortedColumns().map((category) => (
                     <TaskColumn
                         key={category}
@@ -120,12 +147,13 @@ function AddTask({ sortOrder, setSortOrder }) {
                         onMoveTask={(taskId, targetCategory) => moveTask(category, taskId, targetCategory)}
                         setShowForm={toggleForm}
                         setScrollEnabled={setScrollEnabled}
+                        topBarColor={topBarColor}
                     />
                 ))}
                 <TouchableOpacity onPress={addColumn} style={styles.addColumnButton}>
                     <Text>Add new column</Text>
                 </TouchableOpacity>
-            </ScrollView>
+            </View>
             {showAddColumnPopup && (
                 <View style={styles.addColumnPopupOverlay}>
                     <View style={styles.addColumnPopup}>
@@ -140,28 +168,3 @@ function AddTask({ sortOrder, setSortOrder }) {
 export { tsks };
 export default AddTask;
 
-const styles = StyleSheet.create({
-    taskContainers: {
-    },
-    taskColumns: {
-        flexDirection: 'column',
-    },
-    addColumnButton: {
-        borderWidth: 1,
-        borderColor: 'black',
-        padding: 10,
-        margin: 10,
-        borderRadius: 5,
-    },
-    addColumnPopupOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    addColumnPopup: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 5,
-    },
-});

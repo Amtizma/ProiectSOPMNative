@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {View, StyleSheet, ScrollView} from 'react-native';
+import {View, StyleSheet, ScrollView, FlatList} from 'react-native';
 import CategoryPage from './Category';
 import TopBar from './topbar';
 import { cats } from "./Category";
@@ -10,6 +10,9 @@ const App = () => {
     const [handledCats, setHandledCats] = useState([]);
     const [handledTasks, setHandledTasks] = useState([]);
     const [updateLists, setUpdateLists] = useState(false);
+    const [topBarColor, setTopBarColor] = useState('#c1dddf');
+    const [backgroundColor, setBackgroundColor] = useState('lightblue');
+
 
     const handleUpdateLists = () => {
         setUpdateLists(true); // Set the flag to trigger the update
@@ -23,31 +26,41 @@ const App = () => {
             setUpdateLists(false); // Reset the flag after updating
         }
     }, [updateLists]);
+    const styles = StyleSheet.create({
+        appContainer: {
+            flex: 1,
+            backgroundColor: backgroundColor,
 
+        },
+        topBar: {
+            backgroundColor: topBarColor,
+            zIndex: 1,
+        },
+        rest: {
+            zIndex: -1,
+            backgroundColor: backgroundColor,
+        },
+    });
     return (
         <View style={styles.appContainer}>
             <View style = {styles.topBar}>
-            <TopBar sortOrder={sortOrder} setSortOrder={setSortOrder} tasks={handledTasks} categories={handledCats} onUpdateLists={handleUpdateLists} />
+                <TopBar sortOrder={sortOrder} setSortOrder={setSortOrder} tasks={handledTasks} categories={handledCats} onUpdateLists={handleUpdateLists} setTopBarColor = {setTopBarColor} setBackgroundColor = {setBackgroundColor}/>
             </View>
-            <ScrollView  scrollEnabled={false} style={styles.rest}>
-                <CategoryPage />
-                <TaskPage sortOrder={sortOrder} setSortOrder={setSortOrder} />
-            </ScrollView>
+            <FlatList
+                data={[{ key: 'CategoryPage' }, { key: 'TaskPage' }]}
+                renderItem={({ item }) => (
+                    <View style={styles.rest}>
+                        {item.key === 'CategoryPage' && <CategoryPage topBarColor={topBarColor} />}
+                        {item.key === 'TaskPage' && <TaskPage sortOrder={sortOrder} setSortOrder={setSortOrder} topBarColor={topBarColor} />}
+                    </View>
+                )}
+                keyExtractor={(item) => item.key}
+            />
         </View>
     );
 };
 
-const styles = StyleSheet.create({
-    appContainer: {
-        flex: 1,
-    },
-    topBar: {
-        backgroundColor: '#c1dddf',
-    },
-    rest: {
-        zIndex: -1,
-        backgroundColor: 'lightblue',
-    },
-});
+
+
 
 export default App;
